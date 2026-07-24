@@ -7,3 +7,4 @@ Repository that houses the team project for Team 05 CSE 325
 - Godwin Bassey
 - Aldair Payehuanca
 - Onyekachi Miracle Nechi
+- Max Tinka 
