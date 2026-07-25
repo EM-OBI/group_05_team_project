@@ -1,0 +1,55 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f3f3f3;
+}
+
+main{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:calc(100vh - 70px);
+}
+
+.denied-card{
+    width:320px;
+    background:#ececec;
+    border:1px solid #888;
+    border-radius:6px;
+    overflow:hidden;
+    text-align:center;
+}
+
+.denied-card h2{
+    background:#d7d7d7;
+    padding:12px;
+    font-size:18px;
+    border-bottom:1px solid #999;
+}
+
+.denied-card .icon{
+    font-size:48px;
+    padding:25px 0 10px;
+}
+
+.denied-card p{
+    padding:0 25px;
+    font-size:13px;
+    color:#666;
+    line-height:1.5;
+    margin-bottom:10px;
+}
+
+.denied-card a{
+    display:block;
+    padding:15px 0;
+    color:#4d8ef7;
+    text-decoration:none;
+    font-size:13px;
+    margin-bottom:10px;
+}

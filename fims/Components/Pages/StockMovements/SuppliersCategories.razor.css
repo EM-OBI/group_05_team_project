@@ -1,0 +1,87 @@
+h2 {
+    padding: 10px 0 15px;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+::deep .container {
+    display: flex;
+    gap: 1.5rem;
+}
+
+::deep .panel {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+}
+
+::deep .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f0f0f0;
+    border-bottom: 1px solid #bbb;
+}
+
+::deep .panel-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #444;
+}
+
+::deep .panel-header button {
+    height: 32px;
+    padding: 0 12px;
+    border: 2px solid #66aef7;
+    background: #edf6ff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+::deep .panel-header button:hover {
+    background: #dcebff;
+}
+
+::deep table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+::deep th {
+    text-align: left;
+    padding: 10px 12px;
+    background: #f8f8f8;
+    font-size: 13px;
+    color: #555;
+    border-bottom: 1px solid #ddd;
+}
+
+::deep td {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #444;
+    border-bottom: 1px solid #eee;
+}
+
+::deep tr:hover {
+    background: #fafafa;
+}
+
+::deep td button {
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid #999;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+::deep td button:hover {
+    background: #efefef;
+}

@@ -1,0 +1,126 @@
+@page "/reports/product-form"
+@page "/product-form"
+
+<main>
+
+    <section class="form-card">
+
+        <h2>Add / Edit Product</h2>
+
+        <form @onsubmit="HandleSubmit">
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Product Name</label>
+                    <input type="text" @bind="ProductName">
+                </div>
+
+                <div class="field">
+                    <label>SKU</label>
+                    <input type="text" @bind="Sku">
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Category</label>
+
+                    <select @bind="Category">
+                        <option>Select Category</option>
+                        <option>Bakery</option>
+                        <option>Dairy</option>
+                        <option>Grains</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Supplier</label>
+
+                    <select @bind="Supplier">
+                        <option>Select Supplier</option>
+                        <option>Acme Foods</option>
+                        <option>Food Market</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Price</label>
+                    <input type="number" @bind="Price">
+                </div>
+
+                <div class="field">
+                    <label>Current Stock</label>
+                    <input type="number" @bind="CurrentStock">
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Minimum Stock</label>
+                    <input type="number" @bind="MinimumStock">
+                </div>
+
+                <div class="field">
+                    <label>Unit</label>
+
+                    <select @bind="Unit">
+                        <option>Units</option>
+                        <option>Kg</option>
+                        <option>Liters</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="field">
+
+                <label>Description</label>
+
+                <textarea rows="5" @bind="Description"></textarea>
+
+            </div>
+
+            <div class="buttons">
+
+                <button class="cancel" type="reset">
+                    Cancel
+                </button>
+
+                <button class="save" type="submit">
+                    Save Product
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+@code {
+    private string ProductName { get; set; } = string.Empty;
+    private string Sku { get; set; } = string.Empty;
+    private string Category { get; set; } = string.Empty;
+    private string Supplier { get; set; } = string.Empty;
+    private decimal Price { get; set; }
+    private int CurrentStock { get; set; }
+    private int MinimumStock { get; set; }
+    private string Unit { get; set; } = "Units";
+    private string Description { get; set; } = string.Empty;
+
+    private void HandleSubmit()
+    {
+    }
+}

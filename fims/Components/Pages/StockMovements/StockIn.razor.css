@@ -1,0 +1,61 @@
+::deep h2 {
+    padding: 10px 0 5px;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+::deep .card {
+    width: 700px;
+    margin: 20px auto 40px;
+    padding: 30px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+::deep .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+::deep label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+}
+
+::deep input,
+::deep select,
+::deep textarea {
+    padding: 10px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    font-size: 15px;
+    outline: none;
+}
+
+::deep input:focus,
+::deep select:focus,
+::deep textarea:focus {
+    border-color: #4CAF50;
+}
+
+::deep textarea {
+    resize: vertical;
+}
+
+::deep .btn-save {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s;
+}
+
+::deep .btn-save:hover {
+    background: #43a047;
+}

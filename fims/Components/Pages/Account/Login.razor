@@ -1,0 +1,41 @@
+@page "/login"
+@layout LoginLayout
+
+<main>
+    <section class="login-card">
+        <h2>Inventory App</h2>
+
+        <form @onsubmit="HandleLogin">
+            <input
+                type="email"
+                @bind="Email"
+                placeholder="email"
+                required
+            >
+
+            <input
+                type="password"
+                @bind="Password"
+                placeholder="password"
+                required
+            >
+
+            <button type="submit">
+                Log In
+            </button>
+        </form>
+
+        <a href="/register">Create an account</a>
+
+        <p>role assigned by admin at signup</p>
+    </section>
+</main>
+
+@code {
+    private string Email { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+
+    private void HandleLogin()
+    {
+    }
+}

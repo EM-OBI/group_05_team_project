@@ -1,30 +1,90 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">fims</a>
+        <a class="navbar-brand" href="">FIMS</a>
     </div>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+<div class="nav-scrollable">
+
     <nav class="nav flex-column">
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu"></span>
+                Home
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="dashboard">
+                <span class="bi bi-speedometer2-nav-menu"></span>
+                Dashboard
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
+
+            <button type="button"
+                    class="submenu-toggle"
+                    @onclick="ToggleInventory">
+
+                <span class="left">
+                    <span class="bi bi-box-seam-nav-menu"></span>
+                    Inventory
+                </span>
+
+                <span class="arrow">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform .2s; @(inventoryOpen ? "transform:rotate(90deg)" : "")"><path d="M9 6l6 6-6 6"/></svg>
+                </span>
+
+            </button>
+
+            <div class="submenu @(inventoryOpen ? "show" : "")">
+
+                <NavLink class="nav-link sub" href="stock-in">
+                    <span class="bi bi-arrow-down-circle-nav-menu"></span>
+                    Stock In
+                </NavLink>
+
+                <NavLink class="nav-link sub" href="stock-out">
+                    <span class="bi bi-arrow-up-circle-nav-menu"></span>
+                    Stock Out
+                </NavLink>
+
+                <NavLink class="nav-link sub" href="product-list">
+                    <span class="bi bi-list-ul-nav-menu"></span>
+                    Product List
+                </NavLink>
+
+                <NavLink class="nav-link sub" href="product-form">
+                    <span class="bi bi-pencil-square-nav-menu"></span>
+                    Product Form
+                </NavLink>
+
+                <NavLink class="nav-link sub" href="suppliers-categories">
+                    <span class="bi bi-tags-nav-menu"></span>
+                    Suppliers & Categories
+                </NavLink>
+
+            </div>
+
         </div>
+
     </nav>
+
 </div>
 
+@code
+{
+    private bool inventoryOpen = false;
+
+    private void ToggleInventory()
+    {
+        inventoryOpen = !inventoryOpen;
+    }
+}

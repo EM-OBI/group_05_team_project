@@ -1,0 +1,85 @@
+@page "/stockmovements"
+@page "/product-list"
+
+<main>
+
+    <section class="toolbar">
+
+        <input
+            type="text"
+            placeholder="Search products..."
+        >
+
+        <select>
+            <option>Category</option>
+            <option>Bakery</option>
+            <option>Grains</option>
+            <option>Dairy</option>
+        </select>
+
+        <button class="add-btn">+ Add</button>
+
+    </section>
+
+    <section class="table-container">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Supplier</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Flour 1kg</td>
+                    <td>Bakery</td>
+                    <td class="low">3</td>
+                    <td>$2.50</td>
+                    <td>Acme Foods</td>
+                    <td>
+                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Sugar 5kg</td>
+                    <td>Bakery</td>
+                    <td class="low">1</td>
+                    <td>$6.00</td>
+                    <td>Acme Foods</td>
+                    <td>
+                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Rice 10kg</td>
+                    <td>Grains</td>
+                    <td>42</td>
+                    <td>$9.00</td>
+                    <td>Grain Co.</td>
+                    <td>
+                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+        <p class="more">... more rows</p>
+
+    </section>
+
+</main>

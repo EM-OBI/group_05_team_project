@@ -1,0 +1,68 @@
+::deep .home {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+::deep .hero {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+::deep .hero h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+::deep .hero p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+::deep .features {
+    display: flex;
+    gap: 1.5rem;
+}
+
+::deep .feature-card {
+    flex: 1;
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+::deep .feature-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+::deep .feature-card .icon {
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+::deep .feature-card h3 {
+    margin: 0 0 0.5rem;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+::deep .feature-card p {
+    margin: 0;
+    color: #888;
+    font-size: 0.9rem;
+}
