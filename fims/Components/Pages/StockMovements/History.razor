@@ -1,0 +1,112 @@
+@page "/movements"
+@rendermode InteractiveServer
+@inject AppDbContext Db
+
+<main>
+
+    <h2>Stock Movements</h2>
+
+    <section class="toolbar">
+
+        <input type="text" placeholder="Search by product..." @bind="searchTerm" @bind:after="LoadMovements">
+
+        <select @bind="filterType" @bind:after="LoadMovements">
+            <option value="">All Types</option>
+            <option value="StockIn">Stock In</option>
+            <option value="StockOut">Stock Out</option>
+        </select>
+
+    </section>
+
+    <section class="summary">
+        <div class="stat-card stat-in">
+            <span class="stat-label">Total Stock In</span>
+            <span class="stat-value">@totalStockIn</span>
+        </div>
+        <div class="stat-card stat-out">
+            <span class="stat-label">Total Stock Out</span>
+            <span class="stat-value">@totalStockOut</span>
+        </div>
+        <div class="stat-card stat-total">
+            <span class="stat-label">Total Movements</span>
+            <span class="stat-value">@movements.Count</span>
+        </div>
+    </section>
+
+    <section class="table-container">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (movements.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" class="empty">No movements recorded yet.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var m in movements)
+                    {
+                        <tr>
+                            <td>@m.MovementDate.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge @(m.MovementType == MovementType.StockIn ? "badge-in" : "badge-out")">
+                                    @(m.MovementType == MovementType.StockIn ? "Stock In" : "Stock Out")
+                                </span>
+                            </td>
+                            <td>@m.Product?.Name</td>
+                            <td>@m.Quantity</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+
+        </table>
+
+    </section>
+
+</main>
+
+@code {
+    private List<StockMovement> movements = new();
+    private int totalStockIn;
+    private int totalStockOut;
+    private string searchTerm = "";
+    private string filterType = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMovements();
+    }
+
+    private async Task LoadMovements()
+    {
+        var query = Db.StockMovements.Include(sm => sm.Product).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(sm => sm.Product != null && sm.Product.Name.Contains(searchTerm));
+
+        if (Enum.TryParse<MovementType>(filterType, out var type))
+            query = query.Where(sm => sm.MovementType == type);
+
+        movements = await query.OrderByDescending(sm => sm.MovementDate).ToListAsync();
+
+        totalStockIn = await Db.StockMovements
+            .Where(sm => sm.MovementType == MovementType.StockIn)
+            .SumAsync(sm => sm.Quantity);
+
+        totalStockOut = await Db.StockMovements
+            .Where(sm => sm.MovementType == MovementType.StockOut)
+            .SumAsync(sm => sm.Quantity);
+    }
+}

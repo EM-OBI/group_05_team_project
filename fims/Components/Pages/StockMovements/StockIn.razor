@@ -1,45 +1,131 @@
 @page "/stock-in"
+@rendermode InteractiveServer
+@inject AppDbContext Db
 
 <h2>Stock In</h2>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="status-message @(isError ? "error" : "success")">@message</div>
+}
 
 <div class="card">
 
     <div class="form-group">
         <label>Product</label>
-        <select>
-            <option>Select Product</option>
-            <option>Rice</option>
-            <option>Sugar</option>
-            <option>Milk</option>
+        <select @bind="selectedProductId">
+            <option value="0">Select Product</option>
+            @foreach (var p in products)
+            {
+                <option value="@p.ProductId">@p.Name</option>
+            }
         </select>
     </div>
 
     <div class="form-group">
         <label>Quantity</label>
-        <input type="number" />
+        <input type="number" @bind="quantity" min="1" />
     </div>
 
     <div class="form-group">
         <label>Supplier</label>
-        <select>
-            <option>Select Supplier</option>
-            <option>Acme Foods</option>
-            <option>Food Market</option>
+        <select @bind="selectedSupplierId">
+            <option value="0">Select Supplier</option>
+            @foreach (var s in suppliers)
+            {
+                <option value="@s.SupplierId">@s.Name</option>
+            }
         </select>
     </div>
 
     <div class="form-group">
         <label>Date</label>
-        <input type="date" />
+        <input type="date" @bind="movementDate" />
     </div>
 
     <div class="form-group">
         <label>Notes</label>
-        <textarea rows="4"></textarea>
+        <textarea rows="4" @bind="notes"></textarea>
     </div>
 
-    <button class="btn-save">
+    <button class="btn-save" @onclick="SaveStockIn">
         Save Entry
     </button>
 
 </div>
+
+@code {
+    private List<Product> products = new();
+    private List<Supplier> suppliers = new();
+
+    private int selectedProductId;
+    private int selectedSupplierId;
+    private int quantity = 1;
+    private DateTime movementDate = DateTime.Today;
+    private string notes = string.Empty;
+    private string message = string.Empty;
+    private bool isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Db.Products.ToListAsync();
+        suppliers = await Db.Suppliers.ToListAsync();
+    }
+
+    private async Task SaveStockIn()
+    {
+        if (selectedProductId == 0)
+        {
+            message = "Please select a product.";
+            isError = true;
+            return;
+        }
+
+        if (quantity <= 0)
+        {
+            message = "Quantity must be at least 1.";
+            isError = true;
+            return;
+        }
+
+        try
+        {
+            var product = await Db.Products.FindAsync(selectedProductId);
+            if (product == null)
+            {
+                message = "Product not found.";
+                isError = true;
+                return;
+            }
+
+            var movement = new StockMovement
+            {
+                ProductId = selectedProductId,
+                Quantity = quantity,
+                MovementType = MovementType.StockIn,
+                MovementDate = movementDate
+            };
+
+            Db.StockMovements.Add(movement);
+            product.CurrentStockQuantity += quantity;
+
+            await Db.SaveChangesAsync();
+
+            message = $"Stock in recorded for {product.Name}. New quantity: {product.CurrentStockQuantity}";
+            isError = false;
+
+            selectedProductId = 0;
+            selectedSupplierId = 0;
+            quantity = 1;
+            movementDate = DateTime.Today;
+            notes = string.Empty;
+
+            products = await Db.Products.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+            isError = true;
+        }
+    }
+}

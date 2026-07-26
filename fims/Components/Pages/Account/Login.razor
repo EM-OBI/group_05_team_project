@@ -1,5 +1,6 @@
 @page "/login"
 @layout LoginLayout
+@inject NavigationManager Nav
 
 <main>
     <section class="login-card">
@@ -20,9 +21,14 @@
                 required
             >
 
-            <button type="submit">
-                Log In
-            </button>
+            <div class="form-buttons">
+                <button type="button" class="btn-cancel" @onclick="HandleCancel">
+                    Cancel
+                </button>
+                <button type="submit">
+                    Log In
+                </button>
+            </div>
         </form>
 
         <a href="/register">Create an account</a>
@@ -37,5 +43,10 @@
 
     private void HandleLogin()
     {
+    }
+
+    private void HandleCancel()
+    {
+        Nav.NavigateTo("/");
     }
 }
