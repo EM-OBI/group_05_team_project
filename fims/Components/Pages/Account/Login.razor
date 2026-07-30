@@ -1,22 +1,25 @@
 @page "/login"
 @layout LoginLayout
+@using fims.Models.ViewModels
 @inject NavigationManager Nav
+
+
 
 <main>
     <section class="login-card">
         <h2>Inventory App</h2>
 
-        <form @onsubmit="HandleLogin">
+        <EditForm Model="Model" OnValidSubmit="HandleLogin">
             <input
                 type="email"
-                @bind="Email"
+                @bind="Model.Email"
                 placeholder="email"
                 required
             >
 
             <input
                 type="password"
-                @bind="Password"
+                @bind="Model.Password"
                 placeholder="password"
                 required
             >
@@ -29,7 +32,9 @@
                     Log In
                 </button>
             </div>
-        </form>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+        </EditForm>
 
         <a href="/register">Create an account</a>
 
@@ -38,9 +43,7 @@
 </main>
 
 @code {
-    private string Email { get; set; } = string.Empty;
-    private string Password { get; set; } = string.Empty;
-
+    private LoginViewModel Model = new();
     private void HandleLogin()
     {
     }
