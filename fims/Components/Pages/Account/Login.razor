@@ -1,6 +1,10 @@
 @page "/login"
 @layout LoginLayout
+
+@using Microsoft.AspNetCore.Identity
+@using fims.Models
 @using fims.Models.ViewModels
+@inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager Nav
 
 
@@ -9,20 +13,30 @@
     <section class="login-card">
         <h2>Inventory App</h2>
 
-        <EditForm Model="Model" OnValidSubmit="HandleLogin">
-            <input
+        <EditForm Model="@Model" OnValidSubmit="HandleLogin" FormName="LoginForm">
+
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @ErrorMessage
+                </div>
+            }
+
+            <InputText
                 type="email"
-                @bind="Model.Email"
+                @bind-Value="Model.Email"
                 placeholder="email"
                 required
-            >
+            />
 
-            <input
+            <InputText
                 type="password"
-                @bind="Model.Password"
+                @bind-Value="Model.Password"
                 placeholder="password"
                 required
-            >
+            />
 
             <div class="form-buttons">
                 <button type="button" class="btn-cancel" @onclick="HandleCancel">
@@ -32,8 +46,7 @@
                     Log In
                 </button>
             </div>
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+            
         </EditForm>
 
         <a href="/register">Create an account</a>
@@ -44,8 +57,31 @@
 
 @code {
     private LoginViewModel Model = new();
-    private void HandleLogin()
+
+    private string ErrorMessage = string.Empty; 
+    private async Task HandleLogin()
     {
+        ErrorMessage = string.Empty;
+
+        var result = await SignInManager.PasswordSignInAsync(
+            Model.Email,
+            Model.Password,
+            isPersistent: false, 
+            lockoutOnFailure: false
+        );
+
+        if (result.Succeeded)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+
+        if (result.IsLockedOut)
+        {
+            ErrorMessage = "Your account has been locked.";
+        }
+
+        ErrorMessage = "Invalid email or password.";
     }
 
     private void HandleCancel()

@@ -10,16 +10,15 @@ builder.Services
     .AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//Set up password requirement
+//Set up password requirements
 builder.Services
-    .AddIdentityCore<ApplicationUser>(options =>
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
         options.Password.RequireDigit = true;
         options.Password.RequireUppercase = true;
         options.Password.RequiredLength = 8;
         options.Password.RequireNonAlphanumeric = false;
     })
-    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -34,6 +33,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    db.Database.Migrate();
 
     if (!db.Categories.Any())
     {

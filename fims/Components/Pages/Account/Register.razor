@@ -2,53 +2,64 @@
 @layout LoginLayout
 
 @using Microsoft.AspNetCore.Identity
+@using fims.Models
 @using fims.Models.ViewModels
 @inject UserManager<ApplicationUser> UserManager
-
+@inject NavigationManager Navigation
 
 
 <main>
     <section class="register-card">
         <h2>Create an Account</h2>
 
-        <EditForm Model="Model"
-            OnValidSubmit="HandleRegister">
+        <EditForm Model="@Model"
+            OnValidSubmit="HandleRegister"
+            FormName="RegisterForm"
+            >
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-            <input
-                type="text"
-                @bind="Model.FullName"
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @ErrorMessage
+                </div>
+            }
+
+            <InputText
+                
+                @bind-Value="Model.FullName"
                 placeholder="full name"
                 required
-            >
+            />
 
-            <input
+            <InputText
                 type="email"
-                @bind="Model.Email"
+                @bind-Value="Model.Email"
                 placeholder="email"
                 required
-            >
+            />
 
-            <input
+            <InputText
                 type="password"
-                @bind="Model.Password"
+                @bind-Value="Model.Password"
                 placeholder="password"
                 required
-            >
+            />
 
-            <input
+            <InputText
                 type="password"
-                @bind="Model.ConfirmPassword"
+                @bind-Value="Model.ConfirmPassword"
                 placeholder="confirm password"
                 required
-            >
+            />
 
             <button type="submit">
                 Register
             </button>
 
-            <DataAnnotationsValidator />
-
-            <ValidationSummary />
+            <p>Full Name: @Model.FullName</p>
+            <p>Email: @Model.Email</p>
         </EditForm>
 
         <a href="/login">Already have an account? Log in</a>
@@ -61,10 +72,29 @@
 @code {
     private RegisterViewModel Model = new();
 
+    private string ErrorMessage = string.Empty;
+
     private async Task HandleRegister()
-
     {
+        ErrorMessage = string.Empty;
 
+        var user = new ApplicationUser
+        {
+            FullName = Model.FullName,
+            UserName = Model.Email,
+            Email = Model.Email
+        };
+
+        var result = await UserManager.CreateAsync(user, Model.Password);
+
+        if (result.Succeeded)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        ErrorMessage = string.Join(
+            Environment.NewLine,
+            result.Errors.Select(e => e.Description));
     }
-
 }
