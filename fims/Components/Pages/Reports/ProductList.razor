@@ -3,6 +3,8 @@
 @rendermode InteractiveServer
 @inject AppDbContext Db
 
+
+
 <main>
 
     @if (!string.IsNullOrEmpty(statusMessage))
@@ -105,7 +107,11 @@
                             <button class="icon" @onclick="() => EditProduct(p)">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
                             </button>
-                            <button class="icon" @onclick="() => DeleteProduct(p)">
+                            <!-- MODIFIED:
+                                Instead of deleting immediately,
+                                this button now opens a confirmation dialog.
+                                -->
+                                <button class="icon" @onclick="() => ConfirmDelete(p)">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                             </button>
                         </td>
@@ -118,6 +124,45 @@
     </section>
 
 </main>
+
+<!--
+ADDED:
+This confirmation dialog is displayed when the user clicks the
+Delete button. It prevents accidental deletion of products.
+-->
+@if (showDeleteDialog)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+
+            <h3>Delete Product</h3>
+
+            <p>
+                Are you sure you want to delete
+                <strong>@productToDelete?.Name</strong>?
+            </p>
+
+            <p class="warning">
+                This action cannot be undone.
+            </p>
+
+            <div class="modal-buttons">
+
+                <button class="btn-cancel"
+                        @onclick="CancelDelete">
+                    Cancel
+                </button>
+
+                <button class="btn-delete"
+                        @onclick="DeleteConfirmed">
+                    Delete
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+}
 
 @code {
     private List<Product> products = new();
@@ -134,10 +179,19 @@
     private int formMinStock;
 
     private bool showForm;
-    private string searchTerm = "";
-    private string filterCategory = "";
-    private string statusMessage = "";
-    private bool statusIsError;
+        private string searchTerm = "";
+        private string filterCategory = "";
+        private string statusMessage = "";
+        private bool statusIsError;
+
+        // ADDED:
+        // Controls whether the delete confirmation dialog is displayed.
+        private bool showDeleteDialog = false;
+
+        // ADDED:
+        // Stores the product selected by the user for deletion.
+        // The product is only deleted after the user confirms.
+        private Product? productToDelete;
 
     protected override async Task OnInitializedAsync()
     {
@@ -191,6 +245,22 @@
     {
         showForm = false;
         statusMessage = "";
+    }
+
+        // ADDED:
+    // Opens the delete confirmation dialog instead of deleting immediately.
+    private void ConfirmDelete(Product product)
+    {
+        productToDelete = product;
+        showDeleteDialog = true;
+    }
+
+    // ADDED:
+    // Closes the confirmation dialog if the user clicks Cancel.
+    private void CancelDelete()
+    {
+        showDeleteDialog = false;
+        productToDelete = null;
     }
 
     private async Task SaveProduct()
@@ -267,24 +337,45 @@
         }
     }
 
-    private async Task DeleteProduct(Product p)
+    // MODIFIED:
+// Deletes the selected product only after the user confirms
+// the action in the confirmation dialog.
+private async Task DeleteConfirmed()
+{
+    // If no product is selected, do nothing.
+    if (productToDelete == null)
+        return;
+
+    try
     {
-        try
+        // Retrieve the selected product from the database.
+        var product = await Db.Products.FindAsync(productToDelete.ProductId);
+
+        if (product != null)
         {
-            var product = await Db.Products.FindAsync(p.ProductId);
-            if (product != null)
-            {
-                Db.Products.Remove(product);
-                await Db.SaveChangesAsync();
-                statusMessage = $"Deleted '{p.Name}'.";
-                statusIsError = false;
-                await LoadProducts();
-            }
-        }
-        catch (Exception ex)
-        {
-            statusMessage = $"Error deleting: {ex.Message}";
-            statusIsError = true;
+            // Remove the product from the database.
+            Db.Products.Remove(product);
+
+            // Save the changes.
+            await Db.SaveChangesAsync();
+
+            // Display a success message.
+            statusMessage = $"Deleted '{product.Name}'.";
+            statusIsError = false;
+
+            // Refresh the product list.
+            await LoadProducts();
         }
     }
+    catch (Exception ex)
+    {
+        // Display an error message if deletion fails.
+        statusMessage = $"Error deleting: {ex.Message}";
+        statusIsError = true;
+    }
+
+    // Close the confirmation dialog and clear the selected product.
+    showDeleteDialog = false;
+    productToDelete = null;
+}
 }
