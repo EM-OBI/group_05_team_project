@@ -15,7 +15,7 @@
             <div class="status-message @(statusIsError ? "error" : "success")">@statusMessage</div>
         }
 
-        <form @onsubmit="HandleSubmit">
+        <form @onsubmit="HandleSubmit" @formname="ProductForm">
 
             <div class="row">
 

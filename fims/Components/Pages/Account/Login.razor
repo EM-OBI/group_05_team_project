@@ -1,52 +1,84 @@
 @page "/login"
+@rendermode InteractiveServer
+
 @layout LoginLayout
-@inject NavigationManager Nav
+
+@using Microsoft.AspNetCore.Identity
+@using fims.Models
+@using fims.Models.ViewModels
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager Navigation
 
 <main>
+
     <section class="login-card">
-        <h2>Inventory App</h2>
 
-        <form @onsubmit="HandleLogin">
-            <input
+        <h2>FIMS Inventory App</h2>
+
+        <EditForm Model="@Model"
+                  OnValidSubmit="HandleLogin"
+                  FormName="LoginForm">
+
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @ErrorMessage
+                </div>
+            }
+
+            <InputText
+                @bind-Value="Model.Email"
                 type="email"
-                @bind="Email"
-                placeholder="email"
-                required
-            >
+                class="form-control"
+                placeholder="Email" />
 
-            <input
+            <InputText
+                @bind-Value="Model.Password"
                 type="password"
-                @bind="Password"
-                placeholder="password"
-                required
-            >
+                class="form-control"
+                placeholder="Password" />
 
-            <div class="form-buttons">
-                <button type="button" class="btn-cancel" @onclick="HandleCancel">
-                    Cancel
-                </button>
-                <button type="submit">
-                    Log In
-                </button>
+            <div class="form-check mt-2 mb-3">
+                <InputCheckbox @bind-Value="Model.RememberMe" />
+                <label>Remember Me</label>
             </div>
-        </form>
 
-        <a href="/register">Create an account</a>
+            <button class="btn btn-primary" type="submit">
+                Login
+            </button>
+        </EditForm>
 
-        <p>role assigned by admin at signup</p>
+        <a href="/register">
+            Create an account
+        </a>
     </section>
 </main>
 
 @code {
-    private string Email { get; set; } = string.Empty;
-    private string Password { get; set; } = string.Empty;
+    private LoginViewModel Model = new();
 
-    private void HandleLogin()
-    {
-    }
+    private string ErrorMessage = string.Empty;
 
-    private void HandleCancel()
+    private async Task HandleLogin()
     {
-        Nav.NavigateTo("/");
+        ErrorMessage = string.Empty;
+
+        var result = await SignInManager.PasswordSignInAsync(
+            Model.Email,
+            Model.Password,
+            Model.RememberMe,
+            lockoutOnFailure: false);
+        
+        if (result.Succeeded)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        ErrorMessage = "Invalid email or password. Please try again";
     }
 }
