@@ -2,13 +2,11 @@
 @rendermode InteractiveServer
 @layout LoginLayout
 
-@using Microsoft.AspNetCore.Identity
-@using System.Runtime.CompilerServices
-@using Microsoft.EntityFrameworkCore.Internal
 @using fims.Models
 @using fims.Models.ViewModels
-@inject UserManager<ApplicationUser> UserManager
+
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <main>
 
@@ -53,11 +51,16 @@
                 class="form-control"
                 type="password" />
 
-            <button class="btn btn-primary mt-3" type="submit">
-                Register
-            </button>
-            
+            <div class="form-buttons">
+                <button class="btn btn-secondary" type="button" @onclick="HandleCancel">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" type="submit">
+                    Register
+                </button>
+            </div>
         </EditForm>
+
         <a href="/login">
             Already have an account?
         </a>
@@ -69,27 +72,67 @@
 
     private string ErrorMessage = string.Empty;
 
+    private IJSObjectReference? _module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
+        }
+    }
+
     private async Task HandleRegister()
     {
         ErrorMessage = string.Empty;
 
-        var user = new ApplicationUser
+        if (_module is null)
         {
-            FullName = Model.FullName,
-            UserName = Model.Email,
-            Email = Model.Email
-        };
-
-        var result = await UserManager.CreateAsync(user, Model.Password);
-
-        if (result.Succeeded)
-        {
-            Navigation.NavigateTo("/login");
+            ErrorMessage = "Registration is not ready yet. Please try again.";
+            return;
         }
 
-        ErrorMessage = string.Join(
-            Environment.NewLine,
-            result.Errors.Select(e => e.Description)
-        );
+        try
+        {
+            var result = await _module.InvokeAsync<AuthResponse>("postJson", "/api/auth/register", new
+            {
+                FullName = Model.FullName,
+                Email = Model.Email,
+                Password = Model.Password,
+                ConfirmPassword = Model.ConfirmPassword
+            });
+
+            if (result != null && result.Ok)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            var message = result?.Data?.message;
+            ErrorMessage = string.IsNullOrWhiteSpace(message)
+                ? "Registration failed. Please check your information."
+                : message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private class AuthResponse
+    {
+        public bool Ok { get; set; }
+        public AuthData? Data { get; set; }
+    }
+
+    private class AuthData
+    {
+        public string? redirectUrl { get; set; }
+        public string? message { get; set; }
     }
 }

@@ -36,6 +36,12 @@ main {
         text-overflow: ellipsis;
     }
 
+    .user-name {
+        margin-left: 1.5rem;
+        color: #555;
+        font-weight: 600;
+    }
+
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;

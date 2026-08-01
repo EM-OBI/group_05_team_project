@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -7,18 +10,21 @@
 
     <main>
         <div class="top-row px-4">
-            @if (isLoggedIn)
-            {
-                <a href="/login" @onclick="Logout" @onclick:preventDefault>Logout</a>
-            }
-            else
-            {
-                <a href="/login">Login</a>
-            }
+            <AuthorizeView>
+                <Authorized>
+                    <span class="user-name">@context.User.Identity?.Name</span>
+                    <a href="/login" @onclick="Logout" @onclick:preventDefault>Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
         <article class="content px-4">
-            @Body
+            <CascadingAuthenticationState>
+                @Body
+            </CascadingAuthenticationState>
         </article>
     </main>
 </div>
@@ -30,15 +36,25 @@
 </div>
 
 @code {
-    private bool isLoggedIn = false;
+    private IJSObjectReference? _module;
 
-    private void Logout()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        isLoggedIn = false;
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
+        }
     }
 
-    public void Login()
+    private async Task Logout()
     {
-        isLoggedIn = true;
+        if (_module is null)
+        {
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        await _module.InvokeAsync<object>("postJson", "/api/auth/logout", new { });
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 }

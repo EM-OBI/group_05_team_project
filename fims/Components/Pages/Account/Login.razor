@@ -3,12 +3,11 @@
 
 @layout LoginLayout
 
-@using Microsoft.AspNetCore.Identity
 @using fims.Models
 @using fims.Models.ViewModels
 
-@inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <main>
 
@@ -47,9 +46,14 @@
                 <label>Remember Me</label>
             </div>
 
-            <button class="btn btn-primary" type="submit">
-                Login
-            </button>
+            <div class="form-buttons">
+                <button class="btn btn-secondary" type="button" @onclick="HandleCancel">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" type="submit">
+                    Login
+                </button>
+            </div>
         </EditForm>
 
         <a href="/register">
@@ -63,22 +67,67 @@
 
     private string ErrorMessage = string.Empty;
 
+    private IJSObjectReference? _module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
+        }
+    }
+
     private async Task HandleLogin()
     {
         ErrorMessage = string.Empty;
 
-        var result = await SignInManager.PasswordSignInAsync(
-            Model.Email,
-            Model.Password,
-            Model.RememberMe,
-            lockoutOnFailure: false);
-        
-        if (result.Succeeded)
+        if (_module is null)
         {
-            Navigation.NavigateTo("/");
+            ErrorMessage = "Login is not ready yet. Please try again.";
             return;
         }
 
-        ErrorMessage = "Invalid email or password. Please try again";
+        try
+        {
+            var result = await _module.InvokeAsync<AuthResponse>("postJson", "/api/auth/login", new
+            {
+                Email = Model.Email,
+                Password = Model.Password,
+                RememberMe = Model.RememberMe
+            });
+
+            if (result != null && result.Ok)
+            {
+                var redirectUrl = result.Data?.redirectUrl ?? "/";
+                Navigation.NavigateTo(redirectUrl, forceLoad: true);
+                return;
+            }
+
+            var message = result?.Data?.message;
+            ErrorMessage = string.IsNullOrWhiteSpace(message)
+                ? "Invalid email or password. Please try again."
+                : message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private class AuthResponse
+    {
+        public bool Ok { get; set; }
+        public AuthData? Data { get; set; }
+    }
+
+    private class AuthData
+    {
+        public string? redirectUrl { get; set; }
+        public string? message { get; set; }
     }
 }
