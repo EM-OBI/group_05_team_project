@@ -1,0 +1,124 @@
+main {
+    width: 92%;
+    margin: 20px auto;
+}
+
+h2 {
+    padding: 10px 0 15px;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.toolbar {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.toolbar input,
+.toolbar select {
+    height: 42px;
+    padding: 10px;
+    border: 1px solid #999;
+    border-radius: 5px;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-in {
+    border-left: 4px solid #4CAF50;
+}
+
+.stat-in .stat-value {
+    color: #2e7d32;
+}
+
+.stat-out {
+    border-left: 4px solid #e74c3c;
+}
+
+.stat-out .stat-value {
+    color: #c0392b;
+}
+
+.stat-total {
+    border-left: 4px solid #3498db;
+}
+
+.stat-total .stat-value {
+    color: #2980b9;
+}
+
+.table-container {
+    background: #fff;
+    border: 1px solid #bbb;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f0f0f0;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #bbb;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.empty {
+    text-align: center;
+    color: #999;
+    padding: 30px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-in {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-out {
+    background: #f8d7da;
+    color: #721c24;
+}

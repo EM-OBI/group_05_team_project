@@ -1,5 +1,9 @@
 @page "/reports/product-form"
 @page "/product-form"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject AppDbContext Db
+@implements IDisposable
 
 <main>
 
@@ -7,7 +11,12 @@
 
         <h2>Add / Edit Product</h2>
 
-        <form @onsubmit="HandleSubmit">
+        @if (!string.IsNullOrEmpty(statusMessage))
+        {
+            <div class="status-message @(statusIsError ? "error" : "success")">@statusMessage</div>
+        }
+
+        <form @onsubmit="HandleSubmit" @formname="ProductForm">
 
             <div class="row">
 
@@ -27,24 +36,24 @@
 
                 <div class="field">
                     <label>Category</label>
-
-                    <select @bind="Category">
-                        <option>Select Category</option>
-                        <option>Bakery</option>
-                        <option>Dairy</option>
-                        <option>Grains</option>
+                    <select @bind="CategoryId">
+                        <option value="0">Select Category</option>
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat.CategoryId">@cat.Name</option>
+                        }
                     </select>
                 </div>
 
                 <div class="field">
                     <label>Supplier</label>
-
-                    <select @bind="Supplier">
-                        <option>Select Supplier</option>
-                        <option>Acme Foods</option>
-                        <option>Food Market</option>
+                    <select @bind="SupplierId">
+                        <option value="0">Select Supplier</option>
+                        @foreach (var sup in suppliers)
+                        {
+                            <option value="@sup.SupplierId">@sup.Name</option>
+                        }
                     </select>
-
                 </div>
 
             </div>
@@ -53,7 +62,7 @@
 
                 <div class="field">
                     <label>Price</label>
-                    <input type="number" @bind="Price">
+                    <input type="number" step="0.01" @bind="Price">
                 </div>
 
                 <div class="field">
@@ -72,13 +81,11 @@
 
                 <div class="field">
                     <label>Unit</label>
-
                     <select @bind="Unit">
                         <option>Units</option>
                         <option>Kg</option>
                         <option>Liters</option>
                     </select>
-
                 </div>
 
             </div>
@@ -93,7 +100,7 @@
 
             <div class="buttons">
 
-                <button class="cancel" type="reset">
+                <button class="cancel" type="button" @onclick="HandleCancel">
                     Cancel
                 </button>
 
@@ -110,17 +117,149 @@
 </main>
 
 @code {
+    [SupplyParameterFromQuery]
+    public int? ProductId { get; set; }
+
+    private List<Category> categories = new();
+    private List<Supplier> suppliers = new();
+
     private string ProductName { get; set; } = string.Empty;
     private string Sku { get; set; } = string.Empty;
-    private string Category { get; set; } = string.Empty;
-    private string Supplier { get; set; } = string.Empty;
+    private int CategoryId { get; set; }
+    private int SupplierId { get; set; }
     private decimal Price { get; set; }
     private int CurrentStock { get; set; }
     private int MinimumStock { get; set; }
     private string Unit { get; set; } = "Units";
     private string Description { get; set; } = string.Empty;
+    private string statusMessage = string.Empty;
+    private bool statusIsError;
+    private System.Threading.Timer? _timer;
 
-    private void HandleSubmit()
+    protected override async Task OnInitializedAsync()
     {
+        categories = await Db.Categories.ToListAsync();
+        suppliers = await Db.Suppliers.ToListAsync();
+
+        if (ProductId.HasValue)
+        {
+            var product = await Db.Products.FindAsync(ProductId.Value);
+            if (product != null)
+            {
+                ProductName = product.Name;
+                Sku = product.Description ?? "";
+                CategoryId = product.CategoryId;
+                SupplierId = product.SupplierId;
+                Price = product.Price;
+                CurrentStock = product.CurrentStockQuantity;
+                MinimumStock = product.MinimumStockThreshold;
+                Description = product.Description ?? "";
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(ProductName))
+        {
+            statusMessage = "Product name is required.";
+            statusIsError = true;
+            return;
+        }
+        if (CategoryId == 0)
+        {
+            statusMessage = "Please select a category.";
+            statusIsError = true;
+            return;
+        }
+        if (SupplierId == 0)
+        {
+            statusMessage = "Please select a supplier.";
+            statusIsError = true;
+            return;
+        }
+
+        try
+        {
+            if (ProductId.HasValue)
+            {
+                var product = await Db.Products.FindAsync(ProductId.Value);
+                if (product == null)
+                {
+                    statusMessage = "Product not found.";
+                    statusIsError = true;
+                    return;
+                }
+                product.Name = ProductName.Trim();
+                product.Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim();
+                product.CategoryId = CategoryId;
+                product.SupplierId = SupplierId;
+                product.Price = Price;
+                product.CurrentStockQuantity = CurrentStock;
+                product.MinimumStockThreshold = MinimumStock;
+            }
+            else
+            {
+                Db.Products.Add(new Product
+                {
+                    Name = ProductName.Trim(),
+                    Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
+                    CategoryId = CategoryId,
+                    SupplierId = SupplierId,
+                    Price = Price,
+                    CurrentStockQuantity = CurrentStock,
+                    MinimumStockThreshold = MinimumStock
+                });
+            }
+
+            await Db.SaveChangesAsync();
+            statusMessage = "Product saved successfully.";
+            statusIsError = false;
+
+            ClearForm();
+            StartAutoHide();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error saving product: {ex.Message}";
+            statusIsError = true;
+        }
+    }
+
+    private void ClearForm()
+    {
+        ProductName = "";
+        Sku = "";
+        CategoryId = 0;
+        SupplierId = 0;
+        Price = 0;
+        CurrentStock = 0;
+        MinimumStock = 0;
+        Unit = "Units";
+        Description = "";
+    }
+
+    private void HandleCancel()
+    {
+        ClearForm();
+        statusMessage = "";
+        _timer?.Dispose();
+    }
+
+    private void StartAutoHide()
+    {
+        _timer?.Dispose();
+        _timer = new System.Threading.Timer(async _ =>
+        {
+            statusMessage = "";
+            await InvokeAsync(StateHasChanged);
+            _timer?.Dispose();
+            _timer = null;
+        }, null, 3000, System.Threading.Timeout.Infinite);
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
     }
 }

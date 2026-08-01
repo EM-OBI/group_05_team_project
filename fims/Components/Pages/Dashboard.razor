@@ -1,4 +1,7 @@
 @page "/dashboard"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject AppDbContext Db
 
 <main>
 
@@ -6,17 +9,36 @@
 
         <div class="card">
             <h4>Total Products</h4>
-            <h2>248</h2>
+            <h2>@totalProducts</h2>
         </div>
 
         <div class="card">
             <h4>Stock Value</h4>
-            <h2>$12,400</h2>
+            <h2>$@stockValue.ToString("N0")</h2>
         </div>
 
         <div class="card warning">
             <h4>Low Stock Items</h4>
-            <h2>6</h2>
+            <h2>@lowStockCount</h2>
+        </div>
+
+    </section>
+
+    <section class="cards">
+
+        <div class="card">
+            <h4>Categories</h4>
+            <h2>@totalCategories</h2>
+        </div>
+
+        <div class="card">
+            <h4>Suppliers</h4>
+            <h2>@totalSuppliers</h2>
+        </div>
+
+        <div class="card">
+            <h4>Total Stock In</h4>
+            <h2>@totalStockIn</h2>
         </div>
 
     </section>
@@ -25,31 +47,67 @@
 
         <h3>Low Stock Alerts</h3>
 
-        <table>
-
-            <tr>
-                <td>Your Mug</td>
-                <td>Stock: 3</td>
-                <td>Min: 10</td>
-                <td><button>Restock</button></td>
-            </tr>
-
-            <tr>
-                <td>Sugar Bag</td>
-                <td>Stock: 1</td>
-                <td>Min: 5</td>
-                <td><button>Restock</button></td>
-            </tr>
-
-            <tr>
-                <td>Rice</td>
-                <td>Stock: 2</td>
-                <td>Min: 10</td>
-                <td><button>Restock</button></td>
-            </tr>
-
-        </table>
+        @if (lowStockItems.Count == 0)
+        {
+            <p class="empty">No low stock alerts. All products are adequately stocked.</p>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Current Stock</th>
+                        <th>Minimum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in lowStockItems)
+                    {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td class="low">@item.CurrentStock</td>
+                            <td>@item.MinimumStock</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
 
     </section>
 
 </main>
+
+@code {
+    private int totalProducts;
+    private decimal stockValue;
+    private int lowStockCount;
+    private int totalCategories;
+    private int totalSuppliers;
+    private int totalStockIn;
+    private int totalStockOut;
+    private List<DashboardLowStockItem> lowStockItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        totalProducts = await Db.Products.CountAsync();
+        stockValue = await Db.Products.SumAsync(p => p.Price * p.CurrentStockQuantity);
+        lowStockCount = await Db.Products.CountAsync(p => p.CurrentStockQuantity <= p.MinimumStockThreshold);
+        totalCategories = await Db.Categories.CountAsync();
+        totalSuppliers = await Db.Suppliers.CountAsync();
+        totalStockIn = await Db.StockMovements.Where(sm => sm.MovementType == MovementType.StockIn).SumAsync(sm => sm.Quantity);
+        totalStockOut = await Db.StockMovements.Where(sm => sm.MovementType == MovementType.StockOut).SumAsync(sm => sm.Quantity);
+
+        lowStockItems = await Db.Products
+            .Where(p => p.CurrentStockQuantity <= p.MinimumStockThreshold)
+            .OrderBy(p => p.CurrentStockQuantity)
+            .Select(p => new DashboardLowStockItem
+            {
+                ProductId = p.ProductId,
+                ProductName = p.Name,
+                CurrentStock = p.CurrentStockQuantity,
+                MinimumStock = p.MinimumStockThreshold
+            })
+            .ToListAsync();
+    }
+}

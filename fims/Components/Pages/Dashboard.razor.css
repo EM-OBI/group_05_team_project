@@ -101,3 +101,14 @@ button{
 button:hover{
     background:#ffe9e9;
 }
+
+.low{
+    color:#c0392b;
+    font-weight:bold;
+}
+
+.empty{
+    color:#999;
+    padding:20px 0;
+    text-align:center;
+}

@@ -59,7 +59,7 @@ namespace fims.Models
         /// Gets or sets the Id of the authenticated user
         /// who recorded the stock movement.
         /// </summary>
-        public string ApplicationUserId { get; set; } = string.Empty;
+        public string? ApplicationUserId { get; set; }
 
         /// <summary>
         /// Navigation property.
@@ -71,6 +71,6 @@ namespace fims.Models
         /// Navigation property.
         /// Gets the user who recorded this stock movement.
         
-        public ApplicationUser ApplicationUser { get; set; } = null!;
+        public ApplicationUser? ApplicationUser { get; set; }
     }
 }

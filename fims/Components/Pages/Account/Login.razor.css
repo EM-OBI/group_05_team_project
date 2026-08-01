@@ -93,6 +93,24 @@ button:hover{
     background:#bfdcff;
 }
 
+.form-buttons{
+    display:flex;
+    gap:10px;
+}
+
+.form-buttons button{
+    flex:1;
+}
+
+.btn-cancel{
+    border-color:#aaa;
+    background:#e8e8e8;
+}
+
+.btn-cancel:hover{
+    background:#d5d5d5;
+}
+
 .login-card a{
     display:block;
     margin-bottom:10px;

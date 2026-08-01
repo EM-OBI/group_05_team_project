@@ -1,6 +1,14 @@
 @page "/suppliers-categories"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject AppDbContext Db
 
 <h2>Suppliers & Categories</h2>
+
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <div class="status-message @(statusIsError ? "error" : "success")">@statusMessage</div>
+}
 
 <div class="container">
 
@@ -10,52 +18,50 @@
 
         <div class="panel-header">
             <h3>Suppliers</h3>
-            <button>Add Supplier</button>
+            <button @onclick="ShowAddSupplier">Add Supplier</button>
         </div>
+
+        @if (showSupplierForm)
+        {
+            <div class="form-card">
+                <h4>@(formSupplierId == 0 ? "Add Supplier" : "Edit Supplier")</h4>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" @bind="formSupplierName" />
+                </div>
+                <div class="form-group">
+                    <label>Contact Info</label>
+                    <input type="text" @bind="formSupplierContact" placeholder="Phone, email, or address" />
+                </div>
+                <div class="form-buttons">
+                    <button class="btn-cancel" @onclick="CancelSupplierForm">Cancel</button>
+                    <button class="btn-save" @onclick="SaveSupplier">Save</button>
+                </div>
+            </div>
+        }
 
         <table>
 
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Phone</th>
-                    <th>Email</th>
+                    <th>Contact Info</th>
                     <th></th>
                 </tr>
             </thead>
 
             <tbody>
-
-                <tr>
-                    <td>Acme Foods</td>
-                    <td>555-2211</td>
-                    <td>sales@acme.com</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Fresh Market</td>
-                    <td>555-3344</td>
-                    <td>info@fresh.com</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Food Company</td>
-                    <td>555-7788</td>
-                    <td>contact@food.com</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-
+                @foreach (var s in suppliers)
+                {
+                    <tr>
+                        <td>@s.Name</td>
+                        <td>@s.ContactInfo</td>
+                        <td>
+                            <button @onclick="() => EditSupplier(s)">Edit</button>
+                            <button @onclick="() => DeleteSupplier(s)">Delete</button>
+                        </td>
+                    </tr>
+                }
             </tbody>
 
         </table>
@@ -68,48 +74,44 @@
 
         <div class="panel-header">
             <h3>Categories</h3>
-            <button>Add Category</button>
+            <button @onclick="ShowAddCategory">Add Category</button>
         </div>
+
+        @if (showCategoryForm)
+        {
+            <div class="form-card">
+                <h4>@(formCategoryId == 0 ? "Add Category" : "Edit Category")</h4>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" @bind="formCategoryName" />
+                </div>
+                <div class="form-buttons">
+                    <button class="btn-cancel" @onclick="CancelCategoryForm">Cancel</button>
+                    <button class="btn-save" @onclick="SaveCategory">Save</button>
+                </div>
+            </div>
+        }
 
         <table>
 
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Description</th>
                     <th></th>
                 </tr>
             </thead>
 
             <tbody>
-
-                <tr>
-                    <td>Bakery</td>
-                    <td>Bread and flour products</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Dairy</td>
-                    <td>Milk and cheese</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Grains</td>
-                    <td>Rice and cereals</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-
+                @foreach (var c in categories)
+                {
+                    <tr>
+                        <td>@c.Name</td>
+                        <td>
+                            <button @onclick="() => EditCategory(c)">Edit</button>
+                            <button @onclick="() => DeleteCategory(c)">Delete</button>
+                        </td>
+                    </tr>
+                }
             </tbody>
 
         </table>
@@ -117,3 +119,207 @@
     </section>
 
 </div>
+
+@code {
+    private List<Supplier> suppliers = new();
+    private List<Category> categories = new();
+
+    private int formSupplierId;
+    private string formSupplierName = "";
+    private string formSupplierContact = "";
+
+    private int formCategoryId;
+    private string formCategoryName = "";
+
+    private bool showSupplierForm;
+    private bool showCategoryForm;
+    private string statusMessage = "";
+    private bool statusIsError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        suppliers = await Db.Suppliers.ToListAsync();
+        categories = await Db.Categories.ToListAsync();
+    }
+
+    private void ShowAddSupplier()
+    {
+        formSupplierId = 0;
+        formSupplierName = "";
+        formSupplierContact = "";
+        showSupplierForm = true;
+        statusMessage = "";
+    }
+
+    private void EditSupplier(Supplier s)
+    {
+        formSupplierId = s.SupplierId;
+        formSupplierName = s.Name;
+        formSupplierContact = s.ContactInfo;
+        showSupplierForm = true;
+        statusMessage = "";
+    }
+
+    private void CancelSupplierForm()
+    {
+        showSupplierForm = false;
+        statusMessage = "";
+    }
+
+    private async Task SaveSupplier()
+    {
+        if (string.IsNullOrWhiteSpace(formSupplierName))
+        {
+            statusMessage = "Supplier name is required.";
+            statusIsError = true;
+            return;
+        }
+
+        try
+        {
+            if (formSupplierId == 0)
+            {
+                Db.Suppliers.Add(new Supplier
+                {
+                    Name = formSupplierName.Trim(),
+                    ContactInfo = string.IsNullOrWhiteSpace(formSupplierContact) ? "" : formSupplierContact.Trim()
+                });
+            }
+            else
+            {
+                var supplier = await Db.Suppliers.FindAsync(formSupplierId);
+                if (supplier == null)
+                {
+                    statusMessage = "Supplier not found.";
+                    statusIsError = true;
+                    return;
+                }
+                supplier.Name = formSupplierName.Trim();
+                supplier.ContactInfo = string.IsNullOrWhiteSpace(formSupplierContact) ? "" : formSupplierContact.Trim();
+            }
+
+            await Db.SaveChangesAsync();
+            showSupplierForm = false;
+            statusMessage = "Supplier saved successfully.";
+            statusIsError = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error saving supplier: {ex.Message}";
+            statusIsError = true;
+        }
+    }
+
+    private async Task DeleteSupplier(Supplier s)
+    {
+        try
+        {
+            var supplier = await Db.Suppliers.FindAsync(s.SupplierId);
+            if (supplier != null)
+            {
+                Db.Suppliers.Remove(supplier);
+                await Db.SaveChangesAsync();
+                statusMessage = $"Deleted supplier '{s.Name}'.";
+                statusIsError = false;
+                await LoadData();
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error deleting supplier: {ex.Message}";
+            statusIsError = true;
+        }
+    }
+
+    private void ShowAddCategory()
+    {
+        formCategoryId = 0;
+        formCategoryName = "";
+        showCategoryForm = true;
+        statusMessage = "";
+    }
+
+    private void EditCategory(Category c)
+    {
+        formCategoryId = c.CategoryId;
+        formCategoryName = c.Name;
+        showCategoryForm = true;
+        statusMessage = "";
+    }
+
+    private void CancelCategoryForm()
+    {
+        showCategoryForm = false;
+        statusMessage = "";
+    }
+
+    private async Task SaveCategory()
+    {
+        if (string.IsNullOrWhiteSpace(formCategoryName))
+        {
+            statusMessage = "Category name is required.";
+            statusIsError = true;
+            return;
+        }
+
+        try
+        {
+            if (formCategoryId == 0)
+            {
+                Db.Categories.Add(new Category
+                {
+                    Name = formCategoryName.Trim()
+                });
+            }
+            else
+            {
+                var category = await Db.Categories.FindAsync(formCategoryId);
+                if (category == null)
+                {
+                    statusMessage = "Category not found.";
+                    statusIsError = true;
+                    return;
+                }
+                category.Name = formCategoryName.Trim();
+            }
+
+            await Db.SaveChangesAsync();
+            showCategoryForm = false;
+            statusMessage = "Category saved successfully.";
+            statusIsError = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error saving category: {ex.Message}";
+            statusIsError = true;
+        }
+    }
+
+    private async Task DeleteCategory(Category c)
+    {
+        try
+        {
+            var category = await Db.Categories.FindAsync(c.CategoryId);
+            if (category != null)
+            {
+                Db.Categories.Remove(category);
+                await Db.SaveChangesAsync();
+                statusMessage = $"Deleted category '{c.Name}'.";
+                statusIsError = false;
+                await LoadData();
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error deleting category: {ex.Message}";
+            statusIsError = true;
+        }
+    }
+}

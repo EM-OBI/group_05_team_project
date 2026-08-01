@@ -1,25 +1,82 @@
 @page "/stockmovements"
 @page "/product-list"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject AppDbContext Db
 
 <main>
 
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="status-message @(statusIsError ? "error" : "success")">@statusMessage</div>
+    }
+
     <section class="toolbar">
 
-        <input
-            type="text"
-            placeholder="Search products..."
-        >
+        <input type="text" placeholder="Search products..." @bind="searchTerm" @bind:after="LoadProducts">
 
-        <select>
-            <option>Category</option>
-            <option>Bakery</option>
-            <option>Grains</option>
-            <option>Dairy</option>
+        <select @bind="filterCategory" @bind:after="LoadProducts">
+            <option value="">All Categories</option>
+            @foreach (var cat in categories)
+            {
+                <option value="@cat.CategoryId">@cat.Name</option>
+            }
         </select>
 
-        <button class="add-btn">+ Add</button>
+        <button class="add-btn" @onclick="ShowAddForm">+ Add</button>
 
     </section>
+
+    @if (showForm)
+    {
+        <section class="form-card">
+            <h3>@(formProductId == 0 ? "Add Product" : "Edit Product")</h3>
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" @bind="formName" />
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" @bind="formDescription" />
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select @bind="formCategoryId">
+                    <option value="0">Select Category</option>
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat.CategoryId">@cat.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Supplier</label>
+                <select @bind="formSupplierId">
+                    <option value="0">Select Supplier</option>
+                    @foreach (var sup in suppliers)
+                    {
+                        <option value="@sup.SupplierId">@sup.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Price</label>
+                <input type="number" step="0.01" @bind="formPrice" />
+            </div>
+            <div class="form-group">
+                <label>Current Stock</label>
+                <input type="number" @bind="formStock" />
+            </div>
+            <div class="form-group">
+                <label>Minimum Stock</label>
+                <input type="number" @bind="formMinStock" />
+            </div>
+            <div class="form-buttons">
+                <button class="btn-cancel" @onclick="CancelForm">Cancel</button>
+                <button class="btn-save" @onclick="SaveProduct">Save</button>
+            </div>
+        </section>
+    }
 
     <section class="table-container">
 
@@ -37,49 +94,198 @@
             </thead>
 
             <tbody>
-
-                <tr>
-                    <td>Flour 1kg</td>
-                    <td>Bakery</td>
-                    <td class="low">3</td>
-                    <td>$2.50</td>
-                    <td>Acme Foods</td>
-                    <td>
-                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
-                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Sugar 5kg</td>
-                    <td>Bakery</td>
-                    <td class="low">1</td>
-                    <td>$6.00</td>
-                    <td>Acme Foods</td>
-                    <td>
-                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
-                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Rice 10kg</td>
-                    <td>Grains</td>
-                    <td>42</td>
-                    <td>$9.00</td>
-                    <td>Grain Co.</td>
-                    <td>
-                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
-                        <button class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
-                    </td>
-                </tr>
-
+                @foreach (var p in products)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.Category?.Name</td>
+                        <td class="@(p.CurrentStockQuantity <= p.MinimumStockThreshold ? "low" : "")">@p.CurrentStockQuantity</td>
+                        <td>$@p.Price.ToString("F2")</td>
+                        <td>@p.Supplier?.Name</td>
+                        <td>
+                            <button class="icon" @onclick="() => EditProduct(p)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+                            </button>
+                            <button class="icon" @onclick="() => DeleteProduct(p)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6v14a1 1 0 001 1h12a1 1 0 001-1V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                            </button>
+                        </td>
+                    </tr>
+                }
             </tbody>
 
         </table>
 
-        <p class="more">... more rows</p>
-
     </section>
 
 </main>
+
+@code {
+    private List<Product> products = new();
+    private List<Category> categories = new();
+    private List<Supplier> suppliers = new();
+
+    private int formProductId;
+    private string formName = "";
+    private string formDescription = "";
+    private int formCategoryId;
+    private int formSupplierId;
+    private decimal formPrice;
+    private int formStock;
+    private int formMinStock;
+
+    private bool showForm;
+    private string searchTerm = "";
+    private string filterCategory = "";
+    private string statusMessage = "";
+    private bool statusIsError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await Db.Categories.ToListAsync();
+        suppliers = await Db.Suppliers.ToListAsync();
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        var query = Db.Products.Include(p => p.Category).Include(p => p.Supplier).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(p => p.Name.Contains(searchTerm));
+
+        if (int.TryParse(filterCategory, out var catId))
+            query = query.Where(p => p.CategoryId == catId);
+
+        products = await query.ToListAsync();
+    }
+
+    private void ShowAddForm()
+    {
+        formProductId = 0;
+        formName = "";
+        formDescription = "";
+        formCategoryId = 0;
+        formSupplierId = 0;
+        formPrice = 0;
+        formStock = 0;
+        formMinStock = 0;
+        showForm = true;
+        statusMessage = "";
+    }
+
+    private void EditProduct(Product p)
+    {
+        formProductId = p.ProductId;
+        formName = p.Name;
+        formDescription = p.Description ?? "";
+        formCategoryId = p.CategoryId;
+        formSupplierId = p.SupplierId;
+        formPrice = p.Price;
+        formStock = p.CurrentStockQuantity;
+        formMinStock = p.MinimumStockThreshold;
+        showForm = true;
+        statusMessage = "";
+    }
+
+    private void CancelForm()
+    {
+        showForm = false;
+        statusMessage = "";
+    }
+
+    private async Task SaveProduct()
+    {
+        if (string.IsNullOrWhiteSpace(formName))
+        {
+            statusMessage = "Name is required.";
+            statusIsError = true;
+            return;
+        }
+        if (formCategoryId == 0)
+        {
+            statusMessage = "Please select a category. Add categories in Suppliers & Categories first.";
+            statusIsError = true;
+            return;
+        }
+        if (formSupplierId == 0)
+        {
+            statusMessage = "Please select a supplier. Add suppliers in Suppliers & Categories first.";
+            statusIsError = true;
+            return;
+        }
+        if (formPrice <= 0)
+        {
+            statusMessage = "Price must be greater than 0.";
+            statusIsError = true;
+            return;
+        }
+
+        try
+        {
+            if (formProductId == 0)
+            {
+                var product = new Product
+                {
+                    Name = formName.Trim(),
+                    Description = string.IsNullOrWhiteSpace(formDescription) ? null : formDescription.Trim(),
+                    CategoryId = formCategoryId,
+                    SupplierId = formSupplierId,
+                    Price = formPrice,
+                    CurrentStockQuantity = formStock,
+                    MinimumStockThreshold = formMinStock
+                };
+                Db.Products.Add(product);
+            }
+            else
+            {
+                var product = await Db.Products.FindAsync(formProductId);
+                if (product == null)
+                {
+                    statusMessage = "Product not found.";
+                    statusIsError = true;
+                    return;
+                }
+                product.Name = formName.Trim();
+                product.Description = string.IsNullOrWhiteSpace(formDescription) ? null : formDescription.Trim();
+                product.CategoryId = formCategoryId;
+                product.SupplierId = formSupplierId;
+                product.Price = formPrice;
+                product.CurrentStockQuantity = formStock;
+                product.MinimumStockThreshold = formMinStock;
+            }
+
+            await Db.SaveChangesAsync();
+            showForm = false;
+            statusMessage = "Product saved successfully.";
+            statusIsError = false;
+            await LoadProducts();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error saving product: {ex.Message}";
+            statusIsError = true;
+        }
+    }
+
+    private async Task DeleteProduct(Product p)
+    {
+        try
+        {
+            var product = await Db.Products.FindAsync(p.ProductId);
+            if (product != null)
+            {
+                Db.Products.Remove(product);
+                await Db.SaveChangesAsync();
+                statusMessage = $"Deleted '{p.Name}'.";
+                statusIsError = false;
+                await LoadProducts();
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error deleting: {ex.Message}";
+            statusIsError = true;
+        }
+    }
+}

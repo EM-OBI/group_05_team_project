@@ -1,60 +1,138 @@
 @page "/register"
+@rendermode InteractiveServer
 @layout LoginLayout
 
+@using fims.Models
+@using fims.Models.ViewModels
+
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
 <main>
+
     <section class="register-card">
+
         <h2>Create an Account</h2>
 
-        <form @onsubmit="HandleRegister">
+        <EditForm Model="@Model"
+                  OnValidSubmit="HandleRegister"
+                  FormName="RegisterForm">
 
-            <input
-                type="text"
-                @bind="FullName"
-                placeholder="full name"
-                required
-            >
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-            <input
-                type="email"
-                @bind="Email"
-                placeholder="email"
-                required
-            >
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @ErrorMessage
+                </div>
+            }
 
-            <input
-                type="password"
-                @bind="Password"
-                placeholder="password"
-                required
-            >
+            <InputText
+                @bind-Value="Model.FullName"
+                placeholder="Full Name"
+                class="form-control" />
 
-            <input
-                type="password"
-                @bind="ConfirmPassword"
-                placeholder="confirm password"
-                required
-            >
+            <InputText
+                @bind-Value="Model.Email"
+                placeholder="Email"
+                class="form-control"
+                type="email" />
 
-            <button type="submit">
-                Register
-            </button>
+            <InputText
+                @bind-Value="Model.Password"
+                placeholder="Password"
+                class="form-control"
+                type="password" />
 
-        </form>
+            <InputText
+                @bind-Value="Model.ConfirmPassword"
+                placeholder="Confirm Password"
+                class="form-control"
+                type="password" />
 
-        <a href="/login">Already have an account? Log in</a>
+            <div class="form-buttons">
+                <button class="btn btn-secondary" type="button" @onclick="HandleCancel">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" type="submit">
+                    Register
+                </button>
+            </div>
+        </EditForm>
 
-        <p>role assigned by admin at signup</p>
-
+        <a href="/login">
+            Already have an account?
+        </a>
     </section>
 </main>
 
 @code {
-    private string FullName { get; set; } = string.Empty;
-    private string Email { get; set; } = string.Empty;
-    private string Password { get; set; } = string.Empty;
-    private string ConfirmPassword { get; set; } = string.Empty;
+    private RegisterViewModel Model = new();
 
-    private void HandleRegister()
+    private string ErrorMessage = string.Empty;
+
+    private IJSObjectReference? _module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
+        }
+    }
+
+    private async Task HandleRegister()
+    {
+        ErrorMessage = string.Empty;
+
+        if (_module is null)
+        {
+            ErrorMessage = "Registration is not ready yet. Please try again.";
+            return;
+        }
+
+        try
+        {
+            var result = await _module.InvokeAsync<AuthResponse>("postJson", "/api/auth/register", new
+            {
+                FullName = Model.FullName,
+                Email = Model.Email,
+                Password = Model.Password,
+                ConfirmPassword = Model.ConfirmPassword
+            });
+
+            if (result != null && result.Ok)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            var message = result?.Data?.message;
+            ErrorMessage = string.IsNullOrWhiteSpace(message)
+                ? "Registration failed. Please check your information."
+                : message;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private class AuthResponse
+    {
+        public bool Ok { get; set; }
+        public AuthData? Data { get; set; }
+    }
+
+    private class AuthData
+    {
+        public string? redirectUrl { get; set; }
+        public string? message { get; set; }
     }
 }
