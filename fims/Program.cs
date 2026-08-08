@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Server;
 using fims.Components;
 using fims.Data;
 using fims.Models;
+using fims.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,14 +14,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
-    // Password settings
     options.Password.RequireDigit = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 8;
 
-    // User settings
     options.User.RequireUniqueEmail = true;
 })
     .AddRoles<IdentityRole>()
@@ -33,9 +32,18 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = IdentityConstants.ApplicationScheme;
     options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
 })
-    .AddIdentityCookies();
+    .AddIdentityCookies(options =>
+    {
+        options.ApplicationCookie.Configure(c =>
+        {
+            c.LoginPath = "/login";
+            c.AccessDeniedPath = "/access-denied";
+        });
+    });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
@@ -66,15 +74,50 @@ using (var scope = app.Services.CreateScope())
         );
         db.SaveChanges();
     }
+
+    await EnsureAdminRoleAndUserAsync(scope,
+        builder.Configuration["AdminBootstrap:Email"] ?? "admin@fims.local",
+        builder.Configuration["AdminBootstrap:Password"] ?? "Admin@12345");
 }
 
-// Configure the HTTP request pipeline.
+static async Task EnsureAdminRoleAndUserAsync(IServiceScope scope, string adminEmail, string adminPassword)
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    const string adminRole = "Admin";
+    if (!await roleManager.RoleExistsAsync(adminRole))
+    {
+        await roleManager.CreateAsync(new IdentityRole(adminRole));
+    }
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser is null)
+    {
+        adminUser = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FullName = "Administrator"
+        };
+        var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+        if (createResult.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, adminRole);
+        }
+    }
+    else if (!await userManager.IsInRoleAsync(adminUser, adminRole))
+    {
+        await userManager.AddToRoleAsync(adminUser, adminRole);
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseStatusCodePagesWithReExecute("/notfound", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

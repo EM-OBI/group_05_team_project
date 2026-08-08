@@ -1,5 +1,5 @@
 @page "/suppliers-categories"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @rendermode InteractiveServer
 @inject AppDbContext Db
 
@@ -183,26 +183,13 @@ either a Supplier or a Category.
     private bool showCategoryForm;
     private string statusMessage = "";
     private bool statusIsError;
-
-    // ADDED:
-    // Controls whether the delete confirmation dialog is visible.
     private bool showDeleteDialog = false;
-
-    // ADDED:
-    // Indicates whether the selected item is a Supplier.
-    // If false, the selected item is a Category.
     private bool deletingSupplier;
 
-    // ADDED:
-    // Stores the selected Supplier awaiting confirmation.
     private Supplier? supplierToDelete;
 
-    // ADDED:
-    // Stores the selected Category awaiting confirmation.
     private Category? categoryToDelete;
 
-// ADDED:
-// Displays the name of the item inside the confirmation dialog.
 private string deleteItemName = "";
 
     protected override async Task OnInitializedAsync()
@@ -324,7 +311,6 @@ private void ConfirmDeleteSupplier(Supplier supplier)
     showDeleteDialog = true;
 }
 
-// Opens the confirmation dialog for deleting a category.
 private void ConfirmDeleteCategory(Category category)
 {
     categoryToDelete = category;
@@ -334,7 +320,6 @@ private void ConfirmDeleteCategory(Category category)
     showDeleteDialog = true;
 }
 
-// Closes the confirmation dialog.
 private void CancelDelete()
 {
     showDeleteDialog = false;
@@ -429,7 +414,6 @@ private async Task DeleteConfirmed()
         statusIsError = true;
     }
 
-    // Close the dialog and clear the selected item.
     showDeleteDialog = false;
     supplierToDelete = null;
     categoryToDelete = null;

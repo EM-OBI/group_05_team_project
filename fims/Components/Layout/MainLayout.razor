@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using System.Security.Claims
 
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -11,14 +12,14 @@
     <main>
         <div class="top-row px-4">
             <AuthorizeView>
-                <Authorized>
-                    <span class="user-name">@context.User.Identity?.Name</span>
-                    <a href="/login" @onclick="Logout" @onclick:preventDefault>Logout</a>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/login">Login</a>
-                </NotAuthorized>
-            </AuthorizeView>
+                    <Authorized>
+                        <span class="user-name">@DisplayName(context.User)</span>
+                        <a href="/login" @onclick="Logout" @onclick:preventDefault>Logout</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login">Login</a>
+                    </NotAuthorized>
+                </AuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -37,6 +38,20 @@
 
 @code {
     private IJSObjectReference? _module;
+
+    private static string DisplayName(System.Security.Principal.IPrincipal user)
+    {
+        if (user is ClaimsPrincipal principal)
+        {
+            var fullName = principal.FindFirstValue("FullName");
+            if (!string.IsNullOrWhiteSpace(fullName))
+            {
+                return fullName;
+            }
+        }
+
+        return user.Identity?.Name ?? string.Empty;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

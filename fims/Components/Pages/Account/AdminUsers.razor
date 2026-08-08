@@ -1,0 +1,247 @@
+@page "/admin-users"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@using fims.Models.ViewModels
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<main>
+
+    <h2>Administrators</h2>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="status-message @(statusIsError ? "error" : "success")">@statusMessage</div>
+    }
+
+    <section class="form-card">
+
+        <h3>Create new administrator</h3>
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" @bind="formFullName" />
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" @bind="formEmail" />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" @bind="formPassword" />
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" @bind="formConfirmPassword" />
+        </div>
+
+        <div class="form-buttons">
+            <button class="btn-save" @onclick="CreateAdmin" disabled="@isBusy">Create Administrator</button>
+        </div>
+
+    </section>
+
+    <section class="table-container">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (users.Count == 0)
+                {
+                    <tr><td colspan="4" class="empty">No users found.</td></tr>
+                }
+                else
+                {
+                    @foreach (var u in users)
+                    {
+                        <tr>
+                            <td>@u.FullName</td>
+                            <td>@u.Email</td>
+                            <td>
+                                <span class="badge @(u.IsAdmin ? "badge-in" : "badge-out")">
+                                    @(u.IsAdmin ? "Administrator" : "User")
+                                </span>
+                            </td>
+                            <td>
+                                <button class="@(u.IsAdmin ? "btn-danger" : "btn-primary")" @onclick="() => ToggleRole(u)" disabled="@isBusy">
+                                    @(u.IsAdmin ? "Remove Admin" : "Make Admin")
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+
+        </table>
+
+    </section>
+
+</main>
+
+@code {
+    private List<AdminUserListItem> users = new();
+    private string formFullName = string.Empty;
+    private string formEmail = string.Empty;
+    private string formPassword = string.Empty;
+    private string formConfirmPassword = string.Empty;
+    private string statusMessage = string.Empty;
+    private bool statusIsError;
+    private bool isBusy;
+
+    private IJSObjectReference? _module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
+            await LoadUsers();
+            StateHasChanged();
+        }
+    }
+
+    private async Task<List<AdminUserListItem>?> GetUsers()
+    {
+        if (_module is null)
+        {
+            return null;
+        }
+
+        var users = await _module.InvokeAsync<AdminUserListItem[]>("getJsonData", "/api/admin-users/");
+        return users?.ToList();
+    }
+
+    private async Task LoadUsers()
+    {
+        if (_module is null)
+        {
+            return;
+        }
+
+        var loaded = await GetUsers();
+        if (loaded is not null)
+        {
+            users = loaded;
+        }
+        else
+        {
+            statusMessage = "Failed to load users.";
+            statusIsError = true;
+        }
+    }
+
+    private async Task CreateAdmin()
+    {
+        if (_module is null)
+        {
+            statusMessage = "Page is not ready yet. Please try again.";
+            statusIsError = true;
+            return;
+        }
+
+        isBusy = true;
+
+        try
+        {
+            var result = await _module.InvokeAsync<ServerResult>("postJson", "/api/admin-users/create", new
+            {
+                FullName = formFullName,
+                Email = formEmail,
+                Password = formPassword,
+                ConfirmPassword = formConfirmPassword
+            });
+
+            if (result != null && result.Ok)
+            {
+                statusMessage = result.Data?.message ?? "Administrator created successfully.";
+                statusIsError = false;
+                formFullName = string.Empty;
+                formEmail = string.Empty;
+                formPassword = string.Empty;
+                formConfirmPassword = string.Empty;
+                await LoadUsers();
+            }
+            else
+            {
+                var message = result?.Data?.message;
+                statusMessage = string.IsNullOrWhiteSpace(message)
+                    ? "Failed to create administrator."
+                    : message;
+                statusIsError = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"An error occurred: {ex.Message}";
+            statusIsError = true;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private async Task ToggleRole(AdminUserListItem user)
+    {
+        if (_module is null)
+        {
+            return;
+        }
+
+        isBusy = true;
+
+        try
+        {
+            var result = await _module.InvokeAsync<ServerResult>("postJson", $"/api/admin-users/{user.Id}/role", new
+            {
+                isAdmin = !user.IsAdmin
+            });
+
+            if (result != null && result.Ok)
+            {
+                statusMessage = result.Data?.message ?? "Role updated.";
+                statusIsError = false;
+                await LoadUsers();
+            }
+            else
+            {
+                var message = result?.Data?.message;
+                statusMessage = string.IsNullOrWhiteSpace(message) ? "Failed to update role." : message;
+                statusIsError = true;
+                await LoadUsers();
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"An error occurred: {ex.Message}";
+            statusIsError = true;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private class ServerResult
+    {
+        public bool Ok { get; set; }
+        public ServerData? Data { get; set; }
+    }
+
+    private class ServerData
+    {
+        public string? message { get; set; }
+    }
+}
