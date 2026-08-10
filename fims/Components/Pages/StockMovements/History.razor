@@ -10,8 +10,9 @@
     <h2>Stock Movements</h2>
 
     <section class="toolbar">
-
-        <input type="text" placeholder="Search by product..." @bind="searchTerm" @bind:after="LoadMovements">
+        <label>Search
+            <input type="text" placeholder="Search by product..." @bind="searchTerm" @bind:after="LoadMovements">
+        </label>
 
         <select @bind="filterType" @bind:after="LoadMovements">
             <option value="">All Types</option>
@@ -97,7 +98,7 @@
         var query = Db.StockMovements.Include(sm => sm.Product).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
-            query = query.Where(sm => sm.Product != null && sm.Product.Name.Contains(searchTerm));
+            query = query.Where(sm => sm.Product != null && sm.Product.Name.ToLower().Contains(searchTerm));
 
         if (Enum.TryParse<MovementType>(filterType, out var type))
             query = query.Where(sm => sm.MovementType == type);
