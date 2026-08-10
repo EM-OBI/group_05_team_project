@@ -56,6 +56,7 @@ main{
     border-radius:6px;
     overflow:hidden;
     text-align:center;
+    padding: 10px;
 }
 
 .register-card h2{
@@ -96,10 +97,12 @@ button:hover{
 .form-buttons{
     display:flex;
     gap:10px;
+    margin: 5px;
 }
 
 .form-buttons button{
     flex:1;
+    color: #333;
 }
 
 .btn-cancel{
@@ -114,7 +117,7 @@ button:hover{
 .register-card a{
     display:block;
     margin-bottom:10px;
-    color:#4d8ef7;
+    color:#006bb7;
     text-decoration:none;
     font-size:13px;
 }
@@ -123,8 +126,4 @@ button:hover{
     margin-bottom:20px;
     font-size:11px;
     color:#666;
-}
-
-.font-control, .form-check, .form-buttons, .btn, .darker-text a{
-    color: #000;
 }

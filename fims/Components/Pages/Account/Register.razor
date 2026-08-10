@@ -29,28 +29,37 @@
                 </div>
             }
 
-            <InputText
-                @bind-Value="Model.FullName"
-                placeholder="Full Name"
-                class="form-control" />
+            <label> Full Name:
+                <InputText
+                    id="fullName"
+                    @bind-Value="Model.FullName"
+                    placeholder="Full Name"
+                    class="form-control" />
+            </label>
 
-            <InputText
-                @bind-Value="Model.Email"
-                placeholder="Email"
-                class="form-control"
-                type="email" />
+            <label>Email: 
+                <InputText
+                    @bind-Value="Model.Email"
+                    placeholder="Email"
+                    class="form-control"
+                    type="email" />
+            </label>
 
-            <InputText
-                @bind-Value="Model.Password"
-                placeholder="Password"
-                class="form-control"
-                type="password" />
+            <label>Password:
+                <InputText
+                    @bind-Value="Model.Password"
+                    placeholder="Password"
+                    class="form-control"
+                    type="password" />
+            </label>
 
-            <InputText
-                @bind-Value="Model.ConfirmPassword"
-                placeholder="Confirm Password"
-                class="form-control"
-                type="password" />
+            <label>Retype Password: 
+                <InputText
+                    @bind-Value="Model.ConfirmPassword"
+                    placeholder="Retype Password"
+                    class="form-control"
+                    type="password" />
+            </label>
 
             <div class="form-buttons">
                 <button class="btn btn-secondary" type="button" @onclick="HandleCancel">

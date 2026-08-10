@@ -31,21 +31,26 @@
                 </div>
             }
 
-            <InputText
-                @bind-Value="Model.Email"
-                type="email"
-                class="form-control"
-                placeholder="Email" />
+            <label>Email: 
+                <InputText
+                    @bind-Value="Model.Email"
+                    type="email"
+                    class="form-control"
+                    placeholder="Email" />
+            </label>
 
-            <InputText
-                @bind-Value="Model.Password"
-                type="password"
-                class="form-control"
-                placeholder="Password" />
+            <label>Password:
+                <InputText
+                    @bind-Value="Model.Password"
+                    type="password"
+                    class="form-control"
+                    placeholder="Password" />
+            </label>
 
             <div class="form-check mt-2 mb-3">
-                <InputCheckbox @bind-Value="Model.RememberMe" />
-                <label>Remember Me</label>
+                <label>Remember Me:
+                    <InputCheckbox @bind-Value="Model.RememberMe" />
+                </label>
             </div>
 
             <div class="form-buttons">
