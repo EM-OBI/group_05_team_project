@@ -8,8 +8,9 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<main>
+<PageTitle>Register | FIMS Inventory</PageTitle>
 
+<main>
     <section class="register-card">
 
         <h2>Create an Account</h2>
@@ -61,8 +62,11 @@
             </div>
         </EditForm>
 
-        <a href="/login">
+        <a href="/login" class="darker-text">
             Already have an account?
+        </a>
+        <a href="/" class="darker-text">
+            Return home
         </a>
     </section>
 </main>
