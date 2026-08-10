@@ -124,3 +124,7 @@ button:hover{
     font-size:11px;
     color:#666;
 }
+
+.font-control, .form-check, .form-buttons, .btn, .darker-text a{
+    color: #000;
+}
