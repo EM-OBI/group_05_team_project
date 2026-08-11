@@ -201,6 +201,15 @@
 
     private async Task ToggleRole(AdminUserListItem user)
     {
+        if (user.IsAdmin)
+        {
+            var confirmed = await JS.InvokeAsync<bool>(
+                "confirm",
+                $"Remove administrator access from '{user.FullName}'?");
+
+            if (!confirmed)
+                return;
+        }
         if (_module is null)
         {
             return;
