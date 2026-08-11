@@ -73,6 +73,10 @@ form{
     padding:25px;
 }
 
+main ::deep .form-control {
+    margin: 10px 0;
+}
+
 input{
     height:38px;
     border:1px solid #999;

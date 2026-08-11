@@ -99,6 +99,10 @@ button:hover{
     gap:10px;
 }
 
+main ::deep .form-control {
+    margin: 10px 0;
+}
+
 .form-buttons button{
     flex:1;
     color: #333;

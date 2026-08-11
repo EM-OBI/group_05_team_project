@@ -28,38 +28,34 @@
                     @ErrorMessage
                 </div>
             }
+            <InputText
+                id="fullName"
+                aria-label="Full Name"
+                @bind-Value="Model.FullName"
+                placeholder="Full Name"
+                class="form-control" />
 
-            <label> Full Name:
-                <InputText
-                    id="fullName"
-                    @bind-Value="Model.FullName"
-                    placeholder="Full Name"
-                    class="form-control" />
-            </label>
+            <InputText
+                @bind-Value="Model.Email"
+                aria-label="Email"
+                placeholder="Email"
+                class="form-control"
+                type="email" />
+        
 
-            <label>Email: 
-                <InputText
-                    @bind-Value="Model.Email"
-                    placeholder="Email"
-                    class="form-control"
-                    type="email" />
-            </label>
+            <InputText
+                @bind-Value="Model.Password"
+                aria-label="Password"
+                placeholder="Password"
+                class="form-control"
+                type="password" />
 
-            <label>Password:
-                <InputText
-                    @bind-Value="Model.Password"
-                    placeholder="Password"
-                    class="form-control"
-                    type="password" />
-            </label>
-
-            <label>Retype Password: 
-                <InputText
-                    @bind-Value="Model.ConfirmPassword"
-                    placeholder="Retype Password"
-                    class="form-control"
-                    type="password" />
-            </label>
+            <InputText
+                @bind-Value="Model.ConfirmPassword"
+                aria-label="Retype Password"
+                placeholder="Retype Password"
+                class="form-control"
+                type="password" />
 
             <div class="form-buttons">
                 <button class="btn btn-secondary" type="button" @onclick="HandleCancel">

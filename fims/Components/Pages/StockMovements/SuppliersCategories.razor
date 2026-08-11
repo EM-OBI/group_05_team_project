@@ -3,6 +3,8 @@
 @rendermode InteractiveServer
 @inject AppDbContext Db
 
+<PageTitle>Suppliers and Categories | FIMS Inventory</PageTitle>
+
 <h2>Suppliers & Categories</h2>
 
 @if (!string.IsNullOrEmpty(statusMessage))
@@ -46,7 +48,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Contact Info</th>
-                    <th></th>
+                    <th>Edit | Delete</th>
                 </tr>
             </thead>
 
@@ -102,7 +104,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th></th>
+                    <th>Edit | Delete</th>
                 </tr>
             </thead>
 
