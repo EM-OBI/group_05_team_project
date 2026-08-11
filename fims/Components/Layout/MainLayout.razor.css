@@ -102,3 +102,18 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+    .logout-link {
+        padding: 0;
+        border: 0;
+        margin-left: 10px;
+        background: none;
+        color: #006bb7;
+        font: inherit;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    
+    .logout-link:hover {
+        text-decoration: underline;
+    }

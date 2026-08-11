@@ -1,0 +1,37 @@
+<div class="modal-overlay" role="presentation">
+    <section class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="confirm-delete-title">
+        <h3 id="confirm-delete-title">@Title</h3>
+
+        <p>
+            Are you sure you want to delete <strong>@ItemName</strong>?
+        </p>
+
+        <p class="warning">This action cannot be undone.</p>
+
+        <div class="modal-buttons">
+            <button class="btn-cancel" type="button" @onclick="OnCancel" disabled="@IsBusy">
+                Cancel
+            </button>
+            <button class="btn-delete" type="button" @onclick="OnConfirm" disabled="@IsBusy">
+                @(IsBusy ? "Deleting..." : "Delete")
+            </button>
+        </div>
+    </section>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Confirm Delete";
+
+    [Parameter, EditorRequired]
+    public string ItemName { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public EventCallback OnConfirm { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
+}

@@ -5,6 +5,8 @@
 @inject AppDbContext Db
 @implements IDisposable
 
+<PageTitle>Product Form | FIMS Inventory</PageTitle>
+
 <main>
 
     <section class="form-card">
@@ -21,13 +23,13 @@
             <div class="row">
 
                 <div class="field">
-                    <label>Product Name</label>
-                    <input type="text" @bind="ProductName">
+                    <label for="product-name">Product Name</label>
+                    <input type="text" id="product-name" @bind="ProductName">
                 </div>
 
                 <div class="field">
-                    <label>SKU</label>
-                    <input type="text" @bind="Sku">
+                    <label for="sku">SKU</label>
+                    <input type="text" id="sku" @bind="Sku">
                 </div>
 
             </div>
@@ -35,8 +37,8 @@
             <div class="row">
 
                 <div class="field">
-                    <label>Category</label>
-                    <select @bind="CategoryId">
+                    <label for="category">Category</label>
+                    <select id="category" @bind="CategoryId">
                         <option value="0">Select Category</option>
                         @foreach (var cat in categories)
                         {
@@ -46,8 +48,8 @@
                 </div>
 
                 <div class="field">
-                    <label>Supplier</label>
-                    <select @bind="SupplierId">
+                    <label for="supplier">Supplier</label>
+                    <select id="supplier" @bind="SupplierId">
                         <option value="0">Select Supplier</option>
                         @foreach (var sup in suppliers)
                         {
@@ -59,15 +61,14 @@
             </div>
 
             <div class="row">
-
                 <div class="field">
-                    <label>Price</label>
-                    <input type="number" step="0.01" @bind="Price">
+                    <label for="price">Price</label>
+                    <input type="number" step="0.01" id="price" @bind="Price">
                 </div>
 
                 <div class="field">
-                    <label>Current Stock</label>
-                    <input type="number" @bind="CurrentStock">
+                    <label for="current-stock">Current Stock</label>
+                    <input type="number" id="current-stock" @bind="CurrentStock">
                 </div>
 
             </div>
@@ -75,13 +76,13 @@
             <div class="row">
 
                 <div class="field">
-                    <label>Minimum Stock</label>
-                    <input type="number" @bind="MinimumStock">
+                    <label for="minimum-stock">Minimum Stock</label>
+                    <input type="number" id="minimum-stock" @bind="MinimumStock">
                 </div>
 
                 <div class="field">
-                    <label>Unit</label>
-                    <select @bind="Unit">
+                    <label for="unit">Unit</label>
+                    <select @bind="Unit" id="unit">
                         <option>Units</option>
                         <option>Kg</option>
                         <option>Liters</option>
@@ -92,9 +93,9 @@
 
             <div class="field">
 
-                <label>Description</label>
+                <label for="description">Description</label>
 
-                <textarea rows="5" @bind="Description"></textarea>
+                <textarea rows="5" id="description" @bind="Description"></textarea>
 
             </div>
 

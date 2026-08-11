@@ -5,6 +5,8 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
+<PageTitle>Admins | FIMS Inventory</PageTitle>
+
 <main>
 
     <h2>Administrators</h2>
@@ -19,23 +21,27 @@
         <h3>Create new administrator</h3>
 
         <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" @bind="formFullName" />
+            <label>Full Name
+                <input type="text" @bind="formFullName" />
+            </label>
         </div>
 
         <div class="form-group">
-            <label>Email</label>
-            <input type="email" @bind="formEmail" />
+            <label>Email
+                <input type="email" @bind="formEmail" />
+            </label>
         </div>
 
         <div class="form-group">
-            <label>Password</label>
-            <input type="password" @bind="formPassword" />
+            <label>Password
+                <input type="password" @bind="formPassword" />
+            </label>
         </div>
 
         <div class="form-group">
-            <label>Confirm Password</label>
-            <input type="password" @bind="formConfirmPassword" />
+            <label>Confirm Password
+                <input type="password" @bind="formConfirmPassword" />
+            </label>
         </div>
 
         <div class="form-buttons">
@@ -53,7 +59,7 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
-                    <th></th>
+                    <th>Add/Remove Admin</th>
                 </tr>
             </thead>
 
@@ -195,6 +201,15 @@
 
     private async Task ToggleRole(AdminUserListItem user)
     {
+        if (user.IsAdmin)
+        {
+            var confirmed = await JS.InvokeAsync<bool>(
+                "confirm",
+                $"Remove administrator access from '{user.FullName}'?");
+
+            if (!confirmed)
+                return;
+        }
         if (_module is null)
         {
             return;

@@ -3,6 +3,8 @@
 @rendermode InteractiveServer
 @inject AppDbContext Db
 
+<PageTitle>Suppliers and Categories | FIMS Inventory</PageTitle>
+
 <h2>Suppliers & Categories</h2>
 
 @if (!string.IsNullOrEmpty(statusMessage))
@@ -46,7 +48,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Contact Info</th>
-                    <th></th>
+                    <th>Edit | Delete</th>
                 </tr>
             </thead>
 
@@ -102,7 +104,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th></th>
+                    <th>Edit | Delete</th>
                 </tr>
             </thead>
 
@@ -137,36 +139,9 @@ either a Supplier or a Category.
 -->
 @if (showDeleteDialog)
 {
-    <div class="modal-overlay">
-        <div class="modal-box">
-
-            <h3>Confirm Delete</h3>
-
-            <p>
-                Are you sure you want to delete
-                <strong>@deleteItemName</strong>?
-            </p>
-
-            <p class="warning">
-                This action cannot be undone.
-            </p>
-
-            <div class="modal-buttons">
-
-                <button class="btn-cancel"
-                        @onclick="CancelDelete">
-                    Cancel
-                </button>
-
-                <button class="btn-delete"
-                        @onclick="DeleteConfirmed">
-                    Delete
-                </button>
-
-            </div>
-
-        </div>
-    </div>
+    <ConfirmDeleteDialog ItemName="@deleteItemName"
+                         OnConfirm="DeleteConfirmed"
+                         OnCancel="CancelDelete" />
 }
 @code {
     private List<Supplier> suppliers = new();

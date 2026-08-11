@@ -79,11 +79,16 @@ namespace fims.Components
                 return Results.Ok(new { message = "Account created successfully." });
             });
 
-            group.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
+            endpoints.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
             {
                 await signInManager.SignOutAsync();
-                return Results.Ok(new { redirectUrl = "/" });
+                return Results.Redirect("/");
             });
+            // group.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
+            // {
+            //     await signInManager.SignOutAsync();
+            //     return Results.Ok(new { redirectUrl = "/" });
+            // });
 
             var adminGroup = endpoints.MapGroup("/api/admin-users")
                 .RequireAuthorization(policy => policy.RequireRole("Admin"));

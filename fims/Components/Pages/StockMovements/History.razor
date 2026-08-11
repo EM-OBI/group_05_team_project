@@ -10,9 +10,9 @@
     <h2>Stock Movements</h2>
 
     <section class="toolbar">
-        <label>Search
-            <input type="text" placeholder="Search by product..." @bind="searchTerm" @bind:after="LoadMovements">
-        </label>
+
+        <input type="text" aria-label="Search by product" placeholder="Search by product..." @bind="searchTerm" @bind:after="LoadMovements">
+    
 
         <select @bind="filterType" @bind:after="LoadMovements">
             <option value="">All Types</option>
