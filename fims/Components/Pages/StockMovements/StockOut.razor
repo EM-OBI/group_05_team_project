@@ -15,8 +15,8 @@
 <div class="card">
 
     <div class="form-group">
-        <label>Product</label>
-        <select @bind="selectedProductId">
+        <label for="product">Product</label>
+        <select id="product" @bind="selectedProductId">
             <option value="0">Select Product</option>
             @foreach (var p in products)
             {
@@ -26,13 +26,13 @@
     </div>
 
     <div class="form-group">
-        <label>Quantity</label>
-        <input type="number" @bind="quantity" min="1" />
+        <label for="quantity">Quantity</label>
+        <input type="number" @bind="quantity" min="1" id="quantity" />
     </div>
 
     <div class="form-group">
-        <label>Reason</label>
-        <select @bind="reason">
+        <label for="reason">Reason</label>
+        <select id="reason" @bind="reason">
             <option>Sale</option>
             <option>Damage</option>
             <option>Expired</option>
@@ -41,13 +41,13 @@
     </div>
 
     <div class="form-group">
-        <label>Date</label>
-        <input type="date" @bind="movementDate" />
+        <label for="date">Date</label>
+        <input type="date" id="date" @bind="movementDate" />
     </div>
 
     <div class="form-group">
-        <label>Notes</label>
-        <textarea rows="4" @bind="notes"></textarea>
+        <label for="notes">Notes</label>
+        <textarea rows="4" id="notes" @bind="notes"></textarea>
     </div>
 
     <button class="btn-save" @onclick="SaveStockOut">
